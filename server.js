@@ -17,12 +17,25 @@ app.get("/products", (req, res) => {
 });
 
 app.post("/products", (req, res) => {
-  products.push(req.body);
-  res.json({ message: "Product added", products });
+  const newProduct = {
+    ...req.body,
+    id: Date.now().toString() // ✅ ADD REAL ID
+  };
+
+  products.push(newProduct);
+
+  res.json(newProduct); // ✅ IMPORTANT: return object
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
+});
+app.delete("/products/:id", (req, res) => {
+  const id = req.params.id;
+
+  products = products.filter(p => p.id !== id);
+
+  res.json({ message: "Deleted", id });
 });
