@@ -19,23 +19,29 @@ app.get("/products", (req, res) => {
 app.post("/products", (req, res) => {
   const newProduct = {
     id: Date.now().toString(),
-     slug: req.body.title
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]/g, ''),
 
-  title: req.body.title,
-  price: req.body.price,
-  category: req.body.category,
-  description: req.body.description,
-  coverImage: req.body.coverImage,
-  galleryImages: req.body.galleryImages || []
-};
+    slug: req.body.title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, ''),
+
+    title: req.body.title,
+    price: req.body.price,
+    category: req.body.category,
+    description: req.body.description,
+    coverImage: req.body.coverImage,
+    galleryImages: req.body.galleryImages || []
+  };
+
+  products.push(newProduct);
+
+  res.json(newProduct);
+});
 
   products.push(newProduct);
 
   res.json(newProduct); // IMPORTANT
-});
+
 
 const PORT = process.env.PORT || 3000;
 
