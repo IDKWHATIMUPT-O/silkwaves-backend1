@@ -29,7 +29,7 @@ app.post("/products", (req, res) => {
     price: req.body.price,
     category: req.body.category,
     description: req.body.description,
-    coverImage: req.body.coverImage,
+    coverImage: "https://source.unsplash.com/600x800/?saree",
     galleryImages: req.body.galleryImages || []
   };
 
