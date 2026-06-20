@@ -17,32 +17,34 @@ app.get("/products", (req, res) => {
 });
 
 app.post("/products", (req, res) => {
-  const newProduct = {
-    id: Date.now().toString(),
+  try {
+    const newProduct = {
+      id: Date.now().toString(),
 
-    slug: req.body.title
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, ''),
+      title: req.body.title,
+      price: req.body.price,
+      category: req.body.category,
+      description: req.body.description,
 
-    title: req.body.title,
-    price: req.body.price,
-    category: req.body.category,
-    description: req.body.description,
-    coverImage: "https://source.unsplash.com/600x800/?saree",
-    galleryImages: req.body.galleryImages || []
-  };
+      // temporary image handling
+      coverImage:
+        "https://images.unsplash.com/photo-1583391733956-6c78276477e2",
 
-  products.push(newProduct);
+      galleryImages: []
+    };
 
-  res.json(newProduct);
+    products.push(newProduct);
+
+    res.status(201).json(newProduct);
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(400).json({
+      error: "Failed to create product"
+    });
+  }
 });
-
-  products.push(newProduct);
-
-  res.json(newProduct); // IMPORTANT
-
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
