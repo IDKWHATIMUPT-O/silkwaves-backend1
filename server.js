@@ -6,6 +6,14 @@ const app = express();
 
 app.use(cors());
 
+// DO NOT use express.json for file uploads
+
+app.use(
+express.urlencoded({
+extended: true
+})
+);
+
 const upload = multer({
 storage: multer.memoryStorage()
 });
