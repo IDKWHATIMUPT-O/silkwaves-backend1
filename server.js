@@ -49,8 +49,9 @@ id: Date.now().toString(),
     description: req.body.description,
 
     coverImage:
-      "https://images.unsplash.com/photo-1583391733956-6c78276477e2",
-
+req.files?.coverImage?.[0]
+? `data:${req.files.coverImage[0].mimetype};base64,${req.files.coverImage[0].buffer.toString("base64")}`
+: "",
     galleryImages: []
   };
 
