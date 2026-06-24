@@ -19,6 +19,7 @@ storage: multer.memoryStorage()
 });
 
 let products = [];
+let orders = [];
 
 app.get("/", (req, res) => {
 res.send("SILKWAVES API RUNNING");
@@ -27,7 +28,60 @@ res.send("SILKWAVES API RUNNING");
 app.get("/products", (req, res) => {
 res.json(products);
 });
+app.get("/orders", (req, res) => {
+res.json(orders);
+});
+app.post("/orders", (req, res) => {
 
+try{
+
+const order={
+
+id:
+"SW"+
+Date.now(),
+
+customer:
+req.body.customer,
+
+items:
+req.body.items,
+
+amount:
+req.body.amount,
+
+payment:
+req.body.payment
+|| "Pending",
+
+status:
+"Placed",
+
+createdAt:
+new Date()
+
+};
+
+orders.unshift(
+order
+);
+
+res.status(201)
+.json(order);
+
+}
+
+catch{
+
+res.status(400)
+.json({
+error:
+"Order failed"
+});
+
+}
+
+});
 app.post(
 "/products",
 upload.fields([
