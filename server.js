@@ -53,14 +53,20 @@ res
 
 try{
 
+console.log(
+"BODY:",
+req.body
+);
+
 const order =
 await razorpay
 .orders
 .create({
 
 amount:
+Number(
 req.body.amount
-*100,
+)*100,
 
 currency:
 "INR"
@@ -75,123 +81,26 @@ order
 
 catch(err){
 
-res
-.status(400)
-.json({
-error:
-err.message
-});
-
-}
-
-}
+console.log(
+err
 );
-app.post("/orders", (req, res) => {
-
-try {
-
-const {
-
-customer,
-items,
-payment
-
-} = req.body;
-
-let total = 0;
-
-for (const orderItem of items) {
-
-const product =
-products.find(
-p =>
-p.id === orderItem.productId
-);
-
-if (!product) {
-
-return res
-.status(404)
-.json({
-error:
-"Product not found"
-});
-
-}
-
-if (
-product.stock <
-orderItem.quantity
-) {
-
-return res
-.status(400)
-.json({
-error:
-`${product.title} out of stock`
-});
-
-}
-
-product.stock -=
-orderItem.quantity;
-
-total +=
-Number(
-product.price
-) *
-orderItem.quantity;
-
-}
-
-const order = {
-
-id:
-"SW"+Date.now(),
-
-customer,
-
-items,
-
-amount:
-total,
-
-payment:
-payment ||
-"Pending",
-
-status:
-"Placed",
-
-createdAt:
-new Date()
-
-};
-
-orders.unshift(
-order
-);
-
-res
-.status(201)
-.json(
-order
-);
-
-}
-
-catch(err){
 
 res
 .status(400)
 .json({
+
 error:
-err.message
+err.message,
+
+details:
+err
+
 });
 
 }
 
-});
+}
+);
 app.post(
 "/products",
 upload.fields([
