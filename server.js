@@ -181,6 +181,97 @@ error:
 }
 
 });
+app.put(
+"/products/:id",
+
+upload.fields([
+{
+name:"coverImage",
+maxCount:1
+},
+{
+name:"galleryImages",
+maxCount:4
+}
+]),
+
+async (req,res)=>{
+
+try{
+
+const id =
+req.params.id;
+
+const index =
+products.findIndex(
+p =>
+p.id===id
+);
+
+if(index===-1){
+
+return res
+.status(404)
+.json({
+error:
+"Product not found"
+});
+
+}
+
+const old =
+products[index];
+
+products[index]={
+
+...old,
+
+title:
+req.body.title
+||
+old.title,
+
+price:
+req.body.price
+||
+old.price,
+
+stock:
+req.body.stock
+??
+old.stock,
+
+category:
+req.body.category
+||
+old.category,
+
+description:
+req.body.description
+||
+old.description
+
+};
+
+res.json(
+products[index]
+);
+
+}
+
+catch(err){
+
+res
+.status(400)
+.json({
+error:
+err.message
+});
+
+}
+
+}
+);
 app.delete("/products/:id", (req, res) => {
 products =
 products.filter(
