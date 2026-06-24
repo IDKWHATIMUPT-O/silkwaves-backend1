@@ -12,6 +12,7 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "multer": "^2.2.0",
+    "razorpay": "^2.9.6",
     "streamifier": "^0.1.1"
   }
 }
