@@ -189,6 +189,7 @@ req.files?.coverImage?.[0]
 }
 );
 app.post("/orders", (req, res) => {
+  
 
 try{
 
@@ -235,6 +236,40 @@ error:
 }
 
 });
+app.put(
+"/orders/:id/status",
+
+(req,res)=>{
+
+const order=
+orders.find(
+o=>
+o.id===
+req.params.id
+);
+
+if(
+!order
+){
+
+return res
+.status(404)
+.json({
+error:
+"Order not found"
+});
+
+}
+
+order.status=
+req.body.status;
+
+res.json(
+order
+);
+
+}
+);
 app.put(
 "/products/:id",
 
