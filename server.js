@@ -98,10 +98,22 @@ id: Date.now().toString(),
       .replace(/[^\w-]/g, ""),
 
     title: req.body.title,
-    price: req.body.price,
-    category: req.body.category,
-    description: req.body.description,
 
+price: req.body.price,
+
+stock:
+Number(
+req.body.stock || 0
+),
+
+category: req.body.category,
+
+description: req.body.description,
+stock:
+Number(
+req.body.stock
+|| 0
+),
     coverImage:
 req.files?.coverImage?.[0]
 ? `data:${req.files.coverImage[0].mimetype};base64,${req.files.coverImage[0].buffer.toString("base64")}`
