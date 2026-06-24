@@ -122,7 +122,53 @@ req.files?.coverImage?.[0]
 
 }
 );
+app.post("/orders", (req, res) => {
 
+try{
+
+const order={
+
+id:
+"SW"+Date.now(),
+
+customer:
+req.body.customer,
+
+items:
+req.body.items,
+
+amount:
+req.body.amount,
+
+payment:
+req.body.payment ||
+"Pending",
+
+status:
+"Placed"
+
+};
+
+orders.unshift(order);
+
+res
+.status(201)
+.json(order);
+
+}
+
+catch{
+
+res
+.status(400)
+.json({
+error:
+"Order failed"
+});
+
+}
+
+});
 app.delete("/products/:id", (req, res) => {
 products =
 products.filter(
