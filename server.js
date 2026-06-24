@@ -33,26 +33,77 @@ res.json(orders);
 });
 app.post("/orders", (req, res) => {
 
-try{
+try {
 
-const order={
+const {
+
+customer,
+items,
+payment
+
+} = req.body;
+
+let total = 0;
+
+for (const orderItem of items) {
+
+const product =
+products.find(
+p =>
+p.id === orderItem.productId
+);
+
+if (!product) {
+
+return res
+.status(404)
+.json({
+error:
+"Product not found"
+});
+
+}
+
+if (
+product.stock <
+orderItem.quantity
+) {
+
+return res
+.status(400)
+.json({
+error:
+`${product.title} out of stock`
+});
+
+}
+
+product.stock -=
+orderItem.quantity;
+
+total +=
+Number(
+product.price
+) *
+orderItem.quantity;
+
+}
+
+const order = {
 
 id:
-"SW"+
-Date.now(),
+"SW"+Date.now(),
 
-customer:
-req.body.customer,
+customer,
 
-items:
-req.body.items,
+items,
 
 amount:
-req.body.amount,
+total,
 
 payment:
-req.body.payment
-|| "Pending",
+payment ||
+"Pending",
 
 status:
 "Placed",
@@ -66,17 +117,21 @@ orders.unshift(
 order
 );
 
-res.status(201)
-.json(order);
+res
+.status(201)
+.json(
+order
+);
 
 }
 
-catch{
+catch(err){
 
-res.status(400)
+res
+.status(400)
 .json({
 error:
-"Order failed"
+err.message
 });
 
 }
