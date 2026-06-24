@@ -1,12 +1,25 @@
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
+const Razorpay =require('razorpay');
 
 const app = express();
 
 app.use(cors());
 
 app.use(express.json());
+const razorpay =
+new Razorpay({
+
+key_id:
+process.env
+.RAZORPAY_KEY_ID,
+
+key_secret:
+process.env
+.RAZORPAY_KEY_SECRET
+
+});
 
 app.use(
 express.urlencoded({
@@ -30,6 +43,49 @@ res.json(products);
 app.get("/orders", (req, res) => {
 res.json(orders);
 });
+app.post(
+"/create-payment",
+
+async (
+req,
+res
+)=>{
+
+try{
+
+const order =
+await razorpay
+.orders
+.create({
+
+amount:
+req.body.amount
+*100,
+
+currency:
+"INR"
+
+});
+
+res.json(
+order
+);
+
+}
+
+catch(err){
+
+res
+.status(400)
+.json({
+error:
+err.message
+});
+
+}
+
+}
+);
 app.post("/orders", (req, res) => {
 
 try {
