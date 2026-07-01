@@ -63,6 +63,25 @@ let settings = {
   packageHeight: "8"
 
 };
+async function fetchWaybill() {
+
+  const response = await axios.get(
+    "https://track.delhivery.com/waybill/api/bulk/json/",
+    {
+      params: {
+        count: 1
+      },
+      headers: {
+        Authorization: `Token ${process.env.DELHIVERY_API_TOKEN}`,
+        Accept: "application/json"
+      }
+    }
+  );
+
+  console.log(response.data);
+
+  return response.data;
+}
 app.get("/", (req, res) => {
 res.send("SILKWAVES API RUNNING");
 });
@@ -467,7 +486,23 @@ res.json({
 deleted: true
 });
 });
+app.get("/test-awb", async (req, res) => {
 
+  try {
+
+    const data = await fetchWaybill();
+
+    res.json(data);
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.response?.data || err.message
+    });
+
+  }
+
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
