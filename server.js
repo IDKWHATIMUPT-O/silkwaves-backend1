@@ -1,4 +1,6 @@
 const qs = require("qs");
+const buildShipment = require("./services/shipmentBuilder");
+const qs = require("qs");
 const axios = require("axios");
 require("dotenv").config();
 const express = require("express");
@@ -498,6 +500,102 @@ app.get("/test-awb", async (req, res) => {
 
     res.status(500).json({
       error: err.response?.data || err.message
+    });
+
+  }
+
+});
+app.post("/create-shipment/:orderId", async (req, res) => {
+
+  try {
+
+    // Find the order
+    const order = orders.find(
+      o => o.id === req.params.orderId
+    );
+
+    if (!order) {
+
+      return res.status(404).json({
+        error: "Order not found"
+      });
+
+    }
+
+    // Fetch one AWB
+    const awb = await fetchWaybill();
+
+    // Build payload
+    const shipment = buildShipment(
+      order,
+      settings,
+      awb
+    );
+
+    // Convert to Delhivery format
+    const body = qs.stringify({
+
+      format: "json",
+
+      data: JSON.stringify(shipment)
+
+    });
+
+    // Send to Delhivery
+    const response = await axios.post(
+
+      "https://track.delhivery.com/api/cmu/create.json",
+
+      body,
+
+      {
+
+        headers: {
+
+          Authorization:
+            `Token ${process.env.DELHIVERY_API_TOKEN}`,
+
+          Accept: "application/json",
+
+          "Content-Type":
+            "application/x-www-form-urlencoded"
+
+        }
+
+      }
+
+    );
+
+    // Save AWB
+    order.awb = awb;
+
+    order.shipmentStatus = "Created";
+
+    order.delhiveryResponse = response.data;
+
+    res.json({
+
+      success: true,
+
+      awb,
+
+      response: response.data
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      err.response?.data || err.message
+    );
+
+    res.status(500).json({
+
+      error:
+        err.response?.data || err.message
+
     });
 
   }
