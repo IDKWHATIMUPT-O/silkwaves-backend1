@@ -2,9 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const Razorpay =require('razorpay');
-
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 const razorpay =
@@ -31,7 +29,37 @@ storage: multer.memoryStorage()
 
 let products = [];
 let orders = [];
+let settings = {
 
+  companyName: "",
+
+  gstNumber: "",
+
+  email: "",
+
+  phone: "",
+
+  warehouseName: "",
+
+  address: "",
+
+  city: "",
+
+  state: "",
+
+  pincode: "",
+
+  country: "India",
+
+  packageWeight: "0.5",
+
+  packageLength: "30",
+
+  packageBreadth: "25",
+
+  packageHeight: "8"
+
+};
 app.get("/", (req, res) => {
 res.send("SILKWAVES API RUNNING");
 });
@@ -41,6 +69,30 @@ res.json(products);
 });
 app.get("/orders", (req, res) => {
 res.json(orders);
+});
+app.get("/settings", (req, res) => {
+
+  res.json(settings);
+
+});
+app.post("/settings", (req, res) => {
+
+  settings = {
+
+    ...settings,
+
+    ...req.body
+
+  };
+
+  res.json({
+
+    success: true,
+
+    settings
+
+  });
+
 });
 app.post(
 "/create-payment",
