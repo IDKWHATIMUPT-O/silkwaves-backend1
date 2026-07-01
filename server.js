@@ -1,3 +1,6 @@
+const qs = require("qs");
+const axios = require("axios");
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -73,6 +76,76 @@ res.json(orders);
 app.get("/settings", (req, res) => {
 
   res.json(settings);
+  });
+app.get("/check-serviceability", async (req, res) => {
+
+  console.log(process.env.DELHIVERY_API_TOKEN);
+
+  try {
+
+    const pincode = req.query.pincode;
+
+    const response = await axios.get(
+      "https://track.delhivery.com/c/api/pin-codes/json/",
+      {
+        params: {
+          filter_codes: pincode
+        },
+        headers: {
+  Authorization: `Token ${process.env.DELHIVERY_API_TOKEN}`,
+  "Content-Type": "application/json"
+}
+      }
+    );
+
+    res.json(response.data);
+
+  } catch (err) {
+
+    console.log("STATUS:", err.response?.status);
+    console.log("HEADERS:", err.response?.headers);
+    console.log("DATA:", err.response?.data);
+
+    res.status(err.response?.status || 500).json({
+      error: err.message,
+      details: err.response?.data || null
+    });
+
+  }
+
+});
+app.get("/fetch-waybill", async (req, res) => {
+
+  try {
+
+    const count = req.query.count || 1;
+
+    const response = await axios.get(
+      "https://track.delhivery.com/waybill/api/bulk/json/",
+      {
+        params: {
+          count
+        },
+        headers: {
+          Authorization: `Token ${process.env.DELHIVERY_API_TOKEN}`,
+          Accept: "application/json"
+        }
+      }
+    );
+
+    res.json(response.data);
+
+  } catch (err) {
+
+    console.log("STATUS:", err.response?.status);
+    console.log("DATA:", err.response?.data);
+
+    res.status(err.response?.status || 500).json({
+      error: err.message,
+      details: err.response?.data
+    });
+
+  }
 
 });
 app.post("/settings", (req, res) => {
@@ -205,51 +278,58 @@ req.files?.coverImage?.[0]
 }
 );
 app.post("/orders", (req, res) => {
-  
 
-try{
+  try {
 
-const order={
+    const order = {
 
-id:
-"SW"+Date.now(),
+      id: "SW" + Date.now(),
 
-customer:
-req.body.customer,
+      customer: req.body.customer,
 
-items:
-req.body.items,
+      phone: req.body.phone,
 
-amount:
-req.body.amount,
+      address: req.body.address,
 
-payment:
-req.body.payment ||
-"Pending",
+      city: req.body.city,
 
-status:
-"Placed"
+      state: req.body.state || "",
 
-};
+      pincode: req.body.pincode,
 
-orders.unshift(order);
+      items: req.body.items || [],
 
-res
-.status(201)
-.json(order);
+      amount: req.body.amount || 0,
 
-}
+      payment: req.body.payment || "Pending",
 
-catch{
+      status: "Placed",
 
-res
-.status(400)
-.json({
-error:
-"Order failed"
-});
+      awb: null,
 
-}
+      shipmentStatus: "Not Created",
+
+      trackingId: null,
+
+      createdAt: new Date().toISOString()
+
+    };
+
+    orders.unshift(order);
+
+    res.status(201).json(order);
+
+  } catch (err) {
+
+    res.status(400).json({
+
+      error: "Order failed",
+
+      details: err.message
+
+    });
+
+  }
 
 });
 app.put(
@@ -388,12 +468,10 @@ deleted: true
 });
 });
 
-const PORT =
-process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-console.log(
-"Running on",
-PORT
-);
+  console.log("Running on", PORT);
 });
+
+console.log("End of server.js");
