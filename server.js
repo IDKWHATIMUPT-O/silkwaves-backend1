@@ -1,6 +1,5 @@
 const qs = require("qs");
 const buildShipment = require("./services/shipmentBuilder");
-const qs = require("qs");
 const axios = require("axios");
 require("dotenv").config();
 const express = require("express");
