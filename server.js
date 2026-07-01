@@ -565,22 +565,36 @@ app.post("/create-shipment/:orderId", async (req, res) => {
 
     );
 
-    // Save AWB
-    order.awb = awb;
+    // Only save if Delhivery actually created the shipment
+if (!response.data.success) {
 
-    order.shipmentStatus = "Created";
+  return res.status(400).json({
 
-    order.delhiveryResponse = response.data;
+    success: false,
 
-    res.json({
+    awb,
 
-      success: true,
+    response: response.data
 
-      awb,
+  });
 
-      response: response.data
+}
 
-    });
+order.awb = awb;
+
+order.shipmentStatus = "Created";
+
+order.delhiveryResponse = response.data;
+
+res.json({
+
+  success: true,
+
+  awb,
+
+  response: response.data
+
+});
 
   }
 
