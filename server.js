@@ -5,7 +5,7 @@ const connectDB = require("./config/db");
 const qs = require("qs");
 const buildShipment = require("./services/shipmentBuilder");
 const axios = require("axios");
-const Settings = require("./models/Settings");
+const Settings = require("./models/Setting");
 
 
 const express = require("express");
