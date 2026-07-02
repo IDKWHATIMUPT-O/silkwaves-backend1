@@ -1,69 +1,45 @@
+const Product = require("./models/Product");
+require("dotenv").config();
+const PORT = process.env.PORT || 3000;
+const connectDB = require("./config/db");
 const qs = require("qs");
 const buildShipment = require("./services/shipmentBuilder");
 const axios = require("axios");
-require("dotenv").config();
+const Settings = require("./models/Settings");
+
+
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
-const Razorpay =require('razorpay');
+const Razorpay = require("razorpay");
+
 const app = express();
+
 app.use(cors());
 app.use(express.json());
-const razorpay =
-new Razorpay({
-
-key_id:
-process.env
-.RAZORPAY_KEY_ID,
-
-key_secret:
-process.env
-.RAZORPAY_KEY_SECRET
-
-});
-
 app.use(
-express.urlencoded({
-extended:true
-})
+  express.urlencoded({
+    extended: true
+  })
 );
-const upload = multer({
-storage: multer.memoryStorage()
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-let products = [];
+const upload = multer({
+  storage: multer.memoryStorage()
+});
+app.use(cors());
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+);
+let products = []
 let orders = [];
-let settings = {
-
-  companyName: "",
-
-  gstNumber: "",
-
-  email: "",
-
-  phone: "",
-
-  warehouseName: "",
-
-  address: "",
-
-  city: "",
-
-  state: "",
-
-  pincode: "",
-
-  country: "India",
-
-  packageWeight: "0.5",
-
-  packageLength: "30",
-
-  packageBreadth: "25",
-
-  packageHeight: "8"
-
-};
 async function fetchWaybill() {
 
   const response = await axios.get(
@@ -87,16 +63,51 @@ app.get("/", (req, res) => {
 res.send("SILKWAVES API RUNNING");
 });
 
-app.get("/products", (req, res) => {
-res.json(products);
+app.get("/products", async (req, res) => {
+
+  try {
+
+    const products = await Product.find();
+
+    res.json(products);
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
 });
 app.get("/orders", (req, res) => {
 res.json(orders);
 });
-app.get("/settings", (req, res) => {
+app.get("/settings", async (req, res) => {
 
-  res.json(settings);
-  });
+  try {
+
+    let settings = await Settings.findOne();
+
+    if (!settings) {
+
+      settings = await Settings.create({});
+
+    }
+
+    res.json(settings);
+
+  } catch (err) {
+
+    res.status(500).json({
+
+      error: err.message
+
+    });
+
+  }
+
+});
 app.get("/check-serviceability", async (req, res) => {
 
   console.log(process.env.DELHIVERY_API_TOKEN);
@@ -168,23 +179,41 @@ app.get("/fetch-waybill", async (req, res) => {
   }
 
 });
-app.post("/settings", (req, res) => {
+app.post("/settings", async (req, res) => {
 
-  settings = {
+  try {
 
-    ...settings,
+    let settings = await Settings.findOne();
 
-    ...req.body
+    if (!settings) {
 
-  };
+      settings = new Settings();
 
-  res.json({
+    }
 
-    success: true,
+    Object.assign(settings, req.body);
 
-    settings
+    await settings.save();
 
-  });
+    res.json({
+
+      success: true,
+
+      settings
+
+    });
+
+  }
+
+  catch (err) {
+
+    res.status(500).json({
+
+      error: err.message
+
+    });
+
+  }
 
 });
 app.post(
@@ -251,43 +280,35 @@ upload.fields([
 { name: "coverImage", maxCount: 1 },
 { name: "galleryImages", maxCount: 4 }
 ]),
-(req, res) => {
+async (req, res) => {
 try {
-const newProduct = {
-id: Date.now().toString(),
-    slug: req.body.title
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]/g, ""),
+const newProduct = await Product.create({
 
-    title: req.body.title,
+  slug: req.body.title
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]/g, ""),
 
-price: req.body.price,
+  title: req.body.title,
 
-stock:
-Number(
-req.body.stock || 0
-),
+  price: Number(req.body.price),
 
-category: req.body.category,
+  stock: Number(req.body.stock || 0),
 
-description: req.body.description,
-stock:
-Number(
-req.body.stock
-|| 0
-),
-    coverImage:
-req.files?.coverImage?.[0]
-? `data:${req.files.coverImage[0].mimetype};base64,${req.files.coverImage[0].buffer.toString("base64")}`
-: "",
-    galleryImages: []
-  };
+  category: req.body.category,
 
-  products.push(newProduct);
+  description: req.body.description,
 
-  res.status(201).json(newProduct);
+  coverImage:
+    req.files?.coverImage?.[0]
+      ? `data:${req.files.coverImage[0].mimetype};base64,${req.files.coverImage[0].buffer.toString("base64")}`
+      : "",
 
+  galleryImages: []
+
+});
+
+res.status(201).json(newProduct);
 } catch (err) {
   res.status(400).json({
     error: err.message
@@ -520,7 +541,6 @@ app.post("/create-shipment/:orderId", async (req, res) => {
       });
 
     }
-
     // Fetch one AWB
     const awb = await fetchWaybill();
 
@@ -614,10 +634,84 @@ res.json({
   }
 
 });
-const PORT = process.env.PORT || 3000;
+app.get("/shipping-label/:orderId", async (req, res) => {
 
-app.listen(PORT, () => {
-  console.log("Running on", PORT);
+  try {
+
+    const order = orders.find(
+      o => o.id === req.params.orderId
+    );
+
+    if (!order) {
+
+      return res.status(404).json({
+        error: "Order not found"
+      });
+
+    }
+
+    if (!order.awb) {
+
+      return res.status(400).json({
+        error: "Shipment has not been created yet"
+      });
+
+    }
+
+    const response = await axios.get(
+
+      "https://track.delhivery.com/api/p/packing_slip",
+
+      {
+
+        params: {
+
+          wbns: order.awb,
+          pdf: true,
+          pdf_size: "A4"
+
+        },
+
+        headers: {
+
+          Authorization: `Token ${process.env.DELHIVERY_API_TOKEN}`
+
+        }
+
+      }
+
+    );
+
+    res.json(response.data);
+
+  }
+
+  catch (err) {
+
+    console.error(
+      err.response?.data || err.message
+    );
+
+    res.status(500).json({
+
+      error:
+        err.response?.data || err.message
+
+    });
+
+  }
+
 });
 
-console.log("End of server.js");
+connectDB()
+  .then(() => {
+    console.log("About to start Express...");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Database startup failed:");
+    console.error(err);
+  });
