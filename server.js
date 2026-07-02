@@ -1,3 +1,5 @@
+const Order = require("./models/Order");
+const Setting = require("./models/Setting");
 const Product = require("./models/Product");
 require("dotenv").config();
 const PORT = process.env.PORT || 3000;
@@ -5,9 +7,6 @@ const connectDB = require("./config/db");
 const qs = require("qs");
 const buildShipment = require("./services/shipmentBuilder");
 const axios = require("axios");
-const Settings = require("./models/Setting");
-
-
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -38,8 +37,7 @@ app.use(
     extended: true
   })
 );
-let products = []
-let orders = [];
+
 async function fetchWaybill() {
 
   const response = await axios.get(
@@ -80,24 +78,51 @@ app.get("/products", async (req, res) => {
   }
 
 });
-app.get("/orders", (req, res) => {
-res.json(orders);
-});
-app.get("/settings", async (req, res) => {
+console.log("Order =", Order);
+console.log("typeof Order =", typeof Order);
+console.log("Order.find =", Order.find);
+app.get("/setting", async (req, res) => {
 
   try {
 
-    let settings = await Settings.findOne();
+    let settings = await Setting.findOne();
 
     if (!settings) {
 
-      settings = await Settings.create({});
+      settings = await Setting.create({});
 
     }
 
     res.json(settings);
 
-  } catch (err) {
+  }
+
+  catch (err) {
+
+    res.status(500).json({
+
+      error: err.message
+
+    });
+
+  }
+
+});
+app.get("/orders", async (req, res) => {
+
+  try {
+
+    const orders = await Order.find().sort({
+
+      createdAt: -1
+
+    });
+
+    res.json(orders);
+
+  }
+
+  catch (err) {
 
     res.status(500).json({
 
@@ -179,15 +204,15 @@ app.get("/fetch-waybill", async (req, res) => {
   }
 
 });
-app.post("/settings", async (req, res) => {
+app.post("/setting", async (req, res) => {
 
   try {
 
-    let settings = await Settings.findOne();
+    let settings = await Setting.findOne();
 
     if (!settings) {
 
-      settings = new Settings();
+      settings = new Setting();
 
     }
 
@@ -318,8 +343,8 @@ res.status(201).json(newProduct);
 
 }
 );
-app.post("/orders", (req, res) => {
-
+app.post("/orders", async (req, res) => {
+console.log(req.body);
   try {
 
     const order = {
@@ -350,15 +375,13 @@ app.post("/orders", (req, res) => {
 
       shipmentStatus: "Not Created",
 
-      trackingId: null,
-
-      createdAt: new Date().toISOString()
+      trackingId: null
 
     };
 
-    orders.unshift(order);
+    const savedOrder = await Order.create(order);
 
-    res.status(201).json(order);
+    res.status(201).json(savedOrder);
 
   } catch (err) {
 
@@ -373,40 +396,45 @@ app.post("/orders", (req, res) => {
   }
 
 });
-app.put(
-"/orders/:id/status",
+app.put("/orders/:id/status", async (req, res) => {
 
-(req,res)=>{
+  try {
 
-const order=
-orders.find(
-o=>
-o.id===
-req.params.id
-);
+    const order = await Order.findOneAndUpdate(
 
-if(
-!order
-){
+      { id: req.params.id },
 
-return res
-.status(404)
-.json({
-error:
-"Order not found"
+      { status: req.body.status },
+
+      { new: true }
+
+    );
+
+    if (!order) {
+
+      return res.status(404).json({
+
+        error: "Order not found"
+
+      });
+
+    }
+
+    res.json(order);
+
+  }
+
+  catch (err) {
+
+    res.status(500).json({
+
+      error: err.message
+
+    });
+
+  }
+
 });
-
-}
-
-order.status=
-req.body.status;
-
-res.json(
-order
-);
-
-}
-);
 app.put(
 "/products/:id",
 
@@ -530,9 +558,9 @@ app.post("/create-shipment/:orderId", async (req, res) => {
   try {
 
     // Find the order
-    const order = orders.find(
-      o => o.id === req.params.orderId
-    );
+    const order = await Order.findOne({
+  id: req.params.orderId
+});
 
     if (!order) {
 
@@ -606,6 +634,7 @@ order.shipmentStatus = "Created";
 
 order.delhiveryResponse = response.data;
 
+await order.save();
 res.json({
 
   success: true,
