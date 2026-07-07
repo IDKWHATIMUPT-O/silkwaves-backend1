@@ -1,14 +1,10 @@
 require("dotenv").config();
-const productRoutes =
-require("./routes/productRoutes");
-const orderRoutes =
-require("./routes/orderRoutes");
-const settingsRoutes =
-require("./routes/settingsRoutes");
-const shipmentRoutes =
-require("./routes/shipmentRoutes");
-const paymentRoutes =
-require("./routes/paymentRoutes");
+const authRoutes =require("./routes/authRoutes");
+const productRoutes =require("./routes/productRoutes");
+const orderRoutes =require("./routes/orderRoutes");
+const settingsRoutes =require("./routes/settingsRoutes");
+const shipmentRoutes =require("./routes/shipmentRoutes");
+const paymentRoutes =require("./routes/paymentRoutes");
 const Order = require("./models/Order");
 const Setting = require("./models/Setting");
 const Product = require("./models/Product");
@@ -21,32 +17,21 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const Razorpay = require("razorpay");
-
 const app = express();
+const invoiceRoutes = require("./routes/invoiceRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 app.use(cors());
 app.use(express.json());
-app.use(
-  express.urlencoded({
-    extended: true
-  })
-);
-
+app.use(express.urlencoded({extended: true}));
 app.use("/products", productRoutes);
-
-
 app.use("/orders", orderRoutes);
-
-
+app.use("/dashboard", dashboardRoutes);
 app.use("/setting", settingsRoutes);
-
-
 app.use(paymentRoutes);
-
-
 app.use(shipmentRoutes);
-app.get("/test", (req, res) => {
-  res.send("ok");
-});
+app.use("/auth", authRoutes);
+app.use("/invoices", invoiceRoutes);
+app.get("/test", (req, res) => {res.send("ok");});
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,

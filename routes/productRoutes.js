@@ -1,3 +1,4 @@
+const auth = require("../middleware/authMiddleware");
 const express = require("express");
 const multer = require("multer");
 
@@ -10,13 +11,16 @@ const upload = multer({
   storage: multer.memoryStorage()
 });
 
+// Public
 router.get(
   "/",
   controller.getProducts
 );
 
+// Protected
 router.post(
   "/",
+  auth,
   upload.fields([
     {
       name: "coverImage",
@@ -30,8 +34,10 @@ router.post(
   controller.createProduct
 );
 
+// Protected
 router.put(
   "/:id",
+  auth,
   upload.fields([
     {
       name: "coverImage",
@@ -45,8 +51,10 @@ router.put(
   controller.updateProduct
 );
 
+// Protected
 router.delete(
   "/:id",
+  auth,
   controller.deleteProduct
 );
 

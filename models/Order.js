@@ -1,94 +1,150 @@
 const mongoose = require("mongoose");
 
 const itemSchema = new mongoose.Schema({
-
   productId: String,
-
   title: String,
-
   price: Number,
-
-  quantity: Number
-
+  quantity: Number,
+  coverImage: String
 });
 
-const orderSchema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+      unique: true
+    },
 
-  id: {
+    customer: {
+      type: String,
+      required: true
+    },
 
-    type: String,
+    email: {
+      type: String,
+      default: ""
+    },
 
-    unique: true
+    phone: {
+      type: String,
+      required: true
+    },
 
-  },
+    address: {
+      type: String,
+      required: true
+    },
 
-  customer: String,
+    city: {
+      type: String,
+      required: true
+    },
 
-  phone: String,
+    state: {
+      type: String,
+      required: true
+    },
 
-  address: String,
+    pincode: {
+      type: String,
+      required: true
+    },
 
-  city: String,
+    amount: {
+      type: Number,
+      required: true
+    },
 
-  state: String,
+    payment: {
+      type: String,
+      enum: [
+        "Pending",
+        "Paid",
+        "Failed",
+        "Refunded"
+      ],
+      default: "Pending"
+    },
 
-  pincode: String,
-
-  amount: Number,
-
-  payment: {
-
-    type: String,
-
-    default: "Pending"
-
-  },
-
-  status: {
-
-    type: String,
-
-    default: "Placed"
-
-  },
-
-  items: [itemSchema],
-
-  awb: {
-
-    type: String,
-
-    default: null
-
-  },
-
-  shipmentStatus: {
-
-    type: String,
-
-    default: "Not Created"
-
-  },
-
-  trackingId: {
-
-    type: String,
-
-    default: null
-
-  },
-
-  delhiveryResponse: {
-
-    type: Object,
-
-    default: null
-
-  }
-
+    paymentId: {
+      type: String,
+      default: null
+    },
+paymentStatus: {
+  type: String,
+  default: "Pending"
 },
-{
-  timestamps: true
-});
+
+paymentVerified: {
+  type: Boolean,
+  default: false
+},
+
+razorpayOrderId: {
+  type: String,
+  default: null
+},
+
+    orderId: {
+      type: String,
+      default: null
+    },
+
+    status: {
+      type: String,
+      enum: [
+        "Placed",
+        "Confirmed",
+        "Packed",
+        "Shipped",
+        "Delivered",
+        "Cancelled",
+        "Returned"
+      ],
+      default: "Placed"
+    },
+
+    items: [itemSchema],
+
+    awb: {
+      type: String,
+      default: null
+    },
+
+    shipmentStatus: {
+      type: String,
+      default: "Not Created"
+    },
+
+    trackingId: {
+      type: String,
+      default: null
+    },
+
+    trackingUrl: {
+      type: String,
+      default: null
+    },
+
+    courier: {
+      type: String,
+      default: "Delhivery"
+    },
+
+    delhiveryResponse: {
+      type: Object,
+      default: null
+    },
+
+    notes: {
+      type: String,
+      default: ""
+    }
+
+  },
+  {
+    timestamps: true
+  }
+);
 
 module.exports = mongoose.model("Order", orderSchema);
