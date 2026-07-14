@@ -1,7 +1,13 @@
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Setting = require("../models/Setting");
+const shipmentCreated =
+require("../emailTemplates/shipmentCreated");
 
+const {
+sendEmail
+} =
+require("../services/emailService");
 const axios = require("axios");
 const qs = require("qs");
 
@@ -230,7 +236,41 @@ exports.createShipment = async (req, res) => {
         response: response.data
 
       });
+try {
 
+  if (order.email) {
+
+    await sendEmail({
+
+      to: order.email,
+
+      subject: `Your order has been shipped - ${order.id}`,
+
+      html: shipmentCreated(order)
+
+    });
+
+    console.log(
+
+      "Shipment email sent."
+
+    );
+
+  }
+
+}
+
+catch(err){
+
+  console.error(
+
+    "Shipment email failed:",
+
+    err.message
+
+  );
+
+}
     }
 
     order.awb = awb;

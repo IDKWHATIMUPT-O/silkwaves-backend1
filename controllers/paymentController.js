@@ -2,7 +2,9 @@ require("dotenv").config();
 const Product = require("../models/Product");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const { sendEmail } = require("../services/emailService");
 
+const orderConfirmation = require("../emailTemplates/orderConfirmation");
 const Order = require("../models/Order");
 
 const razorpay = new Razorpay({
@@ -145,7 +147,37 @@ await order.save();
       order
 
     });
+try {
 
+  if (order.email) {
+
+    await sendEmail({
+
+      to: order.email,
+
+      subject: `Order Confirmation - ${order.id}`,
+
+      html: orderConfirmation(order)
+
+    });
+
+    console.log("Order confirmation email sent.");
+
+  }
+
+}
+
+catch (err) {
+
+  console.error(
+
+    "Email sending failed:",
+
+    err.message
+
+  );
+
+}
   }
 
   catch (err) {
