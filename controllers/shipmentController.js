@@ -226,31 +226,14 @@ exports.createShipment = async (req, res) => {
       order.delhiveryResponse = response.data;
 
       await order.save();
-try {
+      
+      return res.status(400).json({
 
-  if (order.email) {
-
-    await sendEmail({
-
-      to: order.email,
-
-      subject: `Your order has been shipped - ${order.id}`,
-
-      html: shipmentCreated(order)
+        success: false,
+        awb,
+        response: response.data
 
     });
-
-    console.log(
-
-      "Shipment email sent."
-
-    );
-
-  }
-
-}
-
-catch(err){
 
   console.error(
 
@@ -261,7 +244,6 @@ catch(err){
   );
 
 }
-    }
 
     order.awb = awb;
 
@@ -270,6 +252,31 @@ catch(err){
     order.delhiveryResponse = response.data;
 
     await order.save();
+
+    try {
+
+    if (order.email) {
+
+        await sendEmail({
+
+            to: order.email,
+
+            subject: `Your order has been shipped - ${order.id}`,
+
+            html: shipmentCreated(order)
+
+        });
+
+        console.log("Shipment email sent.");
+
+    }
+
+}
+
+catch (err) {
+
+    console.error("Shipment email failed:", err.message);
+}
 
     res.json({
 
