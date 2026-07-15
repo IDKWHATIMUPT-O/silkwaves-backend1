@@ -226,16 +226,6 @@ exports.createShipment = async (req, res) => {
       order.delhiveryResponse = response.data;
 
       await order.save();
-
-      return res.status(400).json({
-
-        success: false,
-
-        awb,
-
-        response: response.data
-
-      });
 try {
 
   if (order.email) {
