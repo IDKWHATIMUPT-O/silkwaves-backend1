@@ -44,6 +44,13 @@ router.patch(
   controller.updateOrderStatus
 );
 
+// Send Status Update Email
+router.post(
+  "/:id/notify-status",
+  auth,
+  controller.notifyStatusChange
+);
+
 // Update Payment Status
 router.patch(
   "/:id/payment",

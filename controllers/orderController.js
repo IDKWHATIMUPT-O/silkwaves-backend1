@@ -1,4 +1,6 @@
 const Order = require("../models/Order");
+const { sendEmail } = require("../services/emailService");
+const orderStatusUpdate = require("../emailTemplates/orderStatusUpdate");
 
 // Get Orders For Logged-in Customer
 exports.getMyOrders = async (req, res) => {
@@ -190,6 +192,45 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     res.json(order);
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
+};
+
+// Send Status Update Email (independent of the status change itself)
+exports.notifyStatusChange = async (req, res) => {
+
+  try {
+
+    const order = await Order.findOne({
+      id: req.params.id
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        error: "Order not found"
+      });
+    }
+
+    if (!order.email) {
+      return res.status(400).json({
+        error: "This order has no email on file"
+      });
+    }
+
+    await sendEmail({
+      to: order.email,
+      subject: `Order Update - ${order.id}`,
+      html: orderStatusUpdate(order, order.status)
+    });
+
+    res.json({ success: true });
 
   } catch (err) {
 
