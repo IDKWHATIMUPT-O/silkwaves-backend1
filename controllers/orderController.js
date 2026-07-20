@@ -1,5 +1,28 @@
 const Order = require("../models/Order");
 
+// Get Orders For Logged-in Customer
+exports.getMyOrders = async (req, res) => {
+
+  try {
+
+    const orders = await Order.find({
+      phone: req.customer.phone
+    }).sort({
+      createdAt: -1
+    });
+
+    res.json(orders);
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
+};
+
 // Get All Orders
 exports.getOrders = async (req, res) => {
 

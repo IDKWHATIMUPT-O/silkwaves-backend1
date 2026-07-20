@@ -19,3 +19,23 @@ exports.generateToken = (admin) => {
   );
 
 };
+
+exports.generateCustomerToken = (customer) => {
+
+  return jwt.sign(
+
+    {
+      id: customer._id,
+      phone: customer.phone,
+      role: "customer"
+    },
+
+    process.env.JWT_SECRET,
+
+    {
+      expiresIn: "30d"
+    }
+
+  );
+
+};
