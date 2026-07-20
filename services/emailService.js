@@ -1,14 +1,4 @@
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-});
+const axios = require("axios");
 
 async function sendEmail({
   to,
@@ -17,19 +7,39 @@ async function sendEmail({
   attachments = []
 }) {
 
-  return transporter.sendMail({
-
-    from: process.env.EMAIL_FROM,
-
-    to,
-
+  const payload = {
+    sender: {
+      email: process.env.EMAIL_FROM
+    },
+    to: [
+      {
+        email: to
+      }
+    ],
     subject,
+    htmlContent: html
+  };
 
-    html,
+  if (attachments.length > 0) {
+    payload.attachment = attachments.map((file) => ({
+      name: file.filename,
+      content: Buffer.isBuffer(file.content)
+        ? file.content.toString("base64")
+        : file.content
+    }));
+  }
 
-    attachments
-
-  });
+  return axios.post(
+    "https://api.brevo.com/v3/smtp/email",
+    payload,
+    {
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }
+    }
+  );
 
 }
 
