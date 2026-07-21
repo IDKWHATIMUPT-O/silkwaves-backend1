@@ -1,4 +1,5 @@
 const auth = require("../middleware/authMiddleware");
+const { requirePermission } = require("../middleware/permissionMiddleware");
 const express = require("express");
 const multer = require("multer");
 
@@ -21,6 +22,7 @@ router.get(
 router.post(
   "/",
   auth,
+  requirePermission("products", "edit"),
   upload.fields([
     {
       name: "coverImage",
@@ -38,6 +40,7 @@ router.post(
 router.put(
   "/:id",
   auth,
+  requirePermission("products", "edit"),
   upload.fields([
     {
       name: "coverImage",
@@ -55,6 +58,7 @@ router.put(
 router.delete(
   "/:id",
   auth,
+  requirePermission("products", "edit"),
   controller.deleteProduct
 );
 

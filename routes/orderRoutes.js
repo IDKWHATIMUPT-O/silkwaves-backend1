@@ -2,6 +2,7 @@ const express = require("express");
 
 const controller = require("../controllers/orderController");
 const auth = require("../middleware/authMiddleware");
+const { requirePermission } = require("../middleware/permissionMiddleware");
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ router.post(
 router.get(
   "/",
   auth,
+  requirePermission("orders", "view"),
   controller.getOrders
 );
 
@@ -34,6 +36,7 @@ router.get(
 router.get(
   "/:id",
   auth,
+  requirePermission("orders", "view"),
   controller.getOrder
 );
 
@@ -41,6 +44,7 @@ router.get(
 router.patch(
   "/:id/status",
   auth,
+  requirePermission("orders", "edit"),
   controller.updateOrderStatus
 );
 
@@ -48,6 +52,7 @@ router.patch(
 router.post(
   "/:id/notify-status",
   auth,
+  requirePermission("orders", "edit"),
   controller.notifyStatusChange
 );
 
@@ -55,6 +60,7 @@ router.post(
 router.patch(
   "/:id/payment",
   auth,
+  requirePermission("orders", "edit"),
   controller.updatePaymentStatus
 );
 
@@ -62,6 +68,7 @@ router.patch(
 router.delete(
   "/:id",
   auth,
+  requirePermission("orders", "edit"),
   controller.deleteOrder
 );
 

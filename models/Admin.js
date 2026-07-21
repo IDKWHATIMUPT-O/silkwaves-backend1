@@ -1,5 +1,16 @@
 const mongoose = require("mongoose");
 
+const sectionPermission = {
+  view: {
+    type: Boolean,
+    default: false
+  },
+  edit: {
+    type: Boolean,
+    default: false
+  }
+};
+
 const adminSchema = new mongoose.Schema(
   {
     name: {
@@ -23,7 +34,17 @@ const adminSchema = new mongoose.Schema(
 
     role: {
       type: String,
+      enum: ["admin", "employee"],
       default: "admin"
+    },
+
+    permissions: {
+      dashboard: sectionPermission,
+      orders: sectionPermission,
+      fulfillment: sectionPermission,
+      products: sectionPermission,
+      customers: sectionPermission,
+      settings: sectionPermission
     }
   },
   {
