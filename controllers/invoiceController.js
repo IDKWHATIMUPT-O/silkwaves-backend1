@@ -1,5 +1,5 @@
-const PDFDocument = require("pdfkit");
 const Order = require("../models/Order");
+const { generateInvoiceBuffer } = require("../services/invoicePdf");
 
 exports.generateInvoice = async (req, res) => {
 
@@ -17,13 +17,7 @@ exports.generateInvoice = async (req, res) => {
 
     }
 
-    const doc = new PDFDocument({
-
-      size: "A4",
-
-      margin: 50
-
-    });
+    const buffer = await generateInvoiceBuffer(order);
 
     res.setHeader(
       "Content-Type",
@@ -35,141 +29,7 @@ exports.generateInvoice = async (req, res) => {
       `inline; filename=${order.id}.pdf`
     );
 
-    doc.pipe(res);
-
-    // -----------------------
-    // Header
-    // -----------------------
-
-    doc
-      .fontSize(24)
-      .text("SILKWAVES", {
-        align: "center"
-      });
-
-    doc.moveDown();
-
-    doc
-      .fontSize(18)
-      .text("TAX INVOICE", {
-        align: "center"
-      });
-
-    doc.moveDown(2);
-
-    // -----------------------
-    // Invoice Details
-    // -----------------------
-
-    doc.fontSize(12);
-
-    doc.text(`Invoice No : INV-${order.id}`);
-
-    doc.text(`Order No   : ${order.id}`);
-
-    doc.text(
-      `Date       : ${new Date(order.createdAt).toLocaleDateString()}`
-    );
-
-    doc.moveDown();
-
-    // -----------------------
-    // Customer
-    // -----------------------
-
-    doc
-      .fontSize(14)
-      .text("Bill To");
-
-    doc.fontSize(12);
-
-    doc.text(order.customer);
-
-    doc.text(order.phone);
-
-    doc.text(order.address);
-
-    doc.text(
-      `${order.city}, ${order.state}`
-    );
-
-    doc.text(order.pincode);
-
-    doc.moveDown();
-
-    // -----------------------
-    // Items
-    // -----------------------
-
-    doc.fontSize(14).text("Items");
-
-    doc.moveDown(0.5);
-
-    order.items.forEach(item => {
-
-      doc.fontSize(12);
-
-      doc.text(
-
-        `${item.title}
-
-Qty: ${item.quantity}
-
-₹${item.price}
-
-Total: ₹${item.price * item.quantity}`
-
-      );
-
-      doc.moveDown();
-
-    });
-
-    // -----------------------
-    // Total
-    // -----------------------
-
-    doc.moveDown();
-
-    doc.fontSize(14);
-
-    doc.text(
-
-      `Grand Total : ₹${order.amount}`,
-
-      {
-
-        align: "right"
-
-      }
-
-    );
-
-    doc.moveDown(2);
-
-    doc.fontSize(12);
-
-    doc.text(
-
-      "Payment : " + order.payment
-
-    );
-
-    doc.moveDown();
-
-    doc.text(
-
-      "Thank you for shopping with Silkwaves.",
-
-      {
-
-        align: "center"
-
-      }
-
-    );
-
-    doc.end();
+    res.send(buffer);
 
   }
 

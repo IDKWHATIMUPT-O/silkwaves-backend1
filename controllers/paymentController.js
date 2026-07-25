@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const { sendEmail } = require("../services/emailService");
 
 const orderConfirmation = require("../emailTemplates/orderConfirmation");
+const { generateInvoiceBuffer } = require("../services/invoicePdf");
 const Order = require("../models/Order");
 
 const razorpay = new Razorpay({
@@ -151,17 +152,28 @@ try {
 
   if (order.email) {
 
+    const invoiceBuffer = await generateInvoiceBuffer(order);
+
     await sendEmail({
 
       to: order.email,
 
       subject: `Order Confirmation - ${order.id}`,
 
-      html: orderConfirmation(order)
+      html: orderConfirmation(order),
+
+      attachments: [
+
+        {
+          filename: `${order.id}-invoice.pdf`,
+          content: invoiceBuffer
+        }
+
+      ]
 
     });
 
-    console.log("Order confirmation email sent.");
+    console.log("Order confirmation email sent with invoice.");
 
   }
 
