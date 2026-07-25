@@ -44,7 +44,8 @@ const adminSchema = new mongoose.Schema(
       fulfillment: sectionPermission,
       products: sectionPermission,
       customers: sectionPermission,
-      settings: sectionPermission
+      settings: sectionPermission,
+      reports: sectionPermission
     }
   },
   {

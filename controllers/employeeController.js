@@ -7,7 +7,8 @@ const defaultPermissions = () => ({
   fulfillment: { view: false, edit: false },
   products: { view: false, edit: false },
   customers: { view: false, edit: false },
-  settings: { view: false, edit: false }
+  settings: { view: false, edit: false },
+  reports: { view: false, edit: false }
 });
 
 // List all employee accounts

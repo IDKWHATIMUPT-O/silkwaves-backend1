@@ -1,5 +1,5 @@
 const auth = require("../middleware/authMiddleware");
-const { requirePermission } = require("../middleware/permissionMiddleware");
+const { requirePermission, requireAdminRole } = require("../middleware/permissionMiddleware");
 const express = require("express");
 const multer = require("multer");
 
@@ -11,6 +11,14 @@ const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage()
 });
+
+// Export Products (admin-only)
+router.get(
+  "/export",
+  auth,
+  requireAdminRole,
+  controller.exportProducts
+);
 
 // Public
 router.get(

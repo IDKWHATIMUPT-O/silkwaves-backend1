@@ -2,7 +2,7 @@ const express = require("express");
 
 const controller = require("../controllers/orderController");
 const auth = require("../middleware/authMiddleware");
-const { requirePermission } = require("../middleware/permissionMiddleware");
+const { requirePermission, requireAdminRole } = require("../middleware/permissionMiddleware");
 
 const router = express.Router();
 
@@ -30,6 +30,14 @@ router.get(
   auth,
   requirePermission("orders", "view"),
   controller.getOrders
+);
+
+// Export Orders (admin-only)
+router.get(
+  "/export",
+  auth,
+  requireAdminRole,
+  controller.exportOrders
 );
 
 // Get Single Order

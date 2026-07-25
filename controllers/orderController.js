@@ -1,6 +1,56 @@
 const Order = require("../models/Order");
 const { sendEmail } = require("../services/emailService");
 const orderStatusUpdate = require("../emailTemplates/orderStatusUpdate");
+const { buildWorkbook, sendWorkbook } = require("../services/excelReport");
+
+// Export All Orders (admin-only)
+exports.exportOrders = async (req, res) => {
+
+  try {
+
+    const orders = await Order.find().sort({ createdAt: -1 });
+
+    const workbook = buildWorkbook([
+      {
+        name: "Orders",
+        columns: [
+          { header: "Order ID", key: "id", width: 22 },
+          { header: "Customer", key: "customer", width: 24 },
+          { header: "Phone", key: "phone", width: 16 },
+          { header: "Email", key: "email", width: 26 },
+          { header: "Amount", key: "amount", width: 14 },
+          { header: "Payment", key: "payment", width: 14 },
+          { header: "Status", key: "status", width: 14 },
+          { header: "Shipment Status", key: "shipmentStatus", width: 18 },
+          { header: "Courier", key: "courier", width: 14 },
+          { header: "AWB", key: "awb", width: 18 },
+          { header: "Date", key: "date", width: 16 }
+        ],
+        rows: orders.map((o) => ({
+          id: o.id,
+          customer: o.customer,
+          phone: o.phone,
+          email: o.email,
+          amount: o.amount,
+          payment: o.payment,
+          status: o.status,
+          shipmentStatus: o.shipmentStatus,
+          courier: o.courier,
+          awb: o.awb || "",
+          date: new Date(o.createdAt).toLocaleDateString("en-IN")
+        }))
+      }
+    ]);
+
+    await sendWorkbook(res, workbook, "silkwaves-orders.xlsx");
+
+  } catch (err) {
+
+    res.status(500).json({ error: err.message });
+
+  }
+
+};
 
 // Get Orders For Logged-in Customer
 exports.getMyOrders = async (req, res) => {

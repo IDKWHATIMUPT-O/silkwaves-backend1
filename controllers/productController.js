@@ -1,6 +1,7 @@
 const cloudinary = require("../services/cloudinary");
 const streamifier = require("streamifier");
 const Product = require("../models/Product");
+const { buildWorkbook, sendWorkbook } = require("../services/excelReport");
 
 // Upload a single image to Cloudinary
 async function uploadImage(file, folder = "silkwaves/products") {
@@ -36,6 +37,39 @@ exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find();
     res.json(products);
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+// Export products/stock (admin-only)
+exports.exportProducts = async (req, res) => {
+  try {
+    const products = await Product.find();
+
+    const workbook = buildWorkbook([
+      {
+        name: "Products & Stock",
+        columns: [
+          { header: "Title", key: "title", width: 30 },
+          { header: "Category", key: "category", width: 18 },
+          { header: "Price", key: "price", width: 12 },
+          { header: "Stock", key: "stock", width: 10 },
+          { header: "Inventory Value", key: "value", width: 16 },
+        ],
+        rows: products.map((p) => ({
+          title: p.title,
+          category: p.category,
+          price: p.price,
+          stock: p.stock,
+          value: Number(p.price) * Number(p.stock),
+        })),
+      },
+    ]);
+
+    await sendWorkbook(res, workbook, "silkwaves-products.xlsx");
   } catch (err) {
     res.status(500).json({
       error: err.message,
