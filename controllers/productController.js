@@ -104,6 +104,10 @@ exports.createProduct = async (req, res) => {
 
       price: Number(req.body.price),
 
+      compareAtPrice: req.body.compareAtPrice
+        ? Number(req.body.compareAtPrice)
+        : null,
+
       stock: Number(req.body.stock || 0),
 
       category: req.body.category,
@@ -147,6 +151,12 @@ exports.updateProduct = async (req, res) => {
       req.body.stock !== undefined
         ? Number(req.body.stock)
         : product.stock;
+
+    if (req.body.compareAtPrice !== undefined) {
+      product.compareAtPrice = req.body.compareAtPrice
+        ? Number(req.body.compareAtPrice)
+        : null;
+    }
 
     product.category =
       req.body.category || product.category;

@@ -4,6 +4,7 @@ const { generateOtp, hashOtp, compareOtp, OTP_TTL_MS, MAX_ATTEMPTS } = require("
 const { sendEmail } = require("../services/emailService");
 const otpEmail = require("../emailTemplates/otpEmail");
 const { isPincodeServiceable } = require("../services/serviceability");
+const Product = require("../models/Product");
 
 // Request OTP (find-or-create customer, email them a code)
 // NOTE: delivered by email for now since Indian DLT sender/template
@@ -275,6 +276,82 @@ exports.deleteAddress = async (req, res) => {
     await customer.save();
 
     res.json(customer.addresses);
+
+  } catch (err) {
+
+    res.status(500).json({ error: err.message });
+
+  }
+
+};
+
+// List wishlist (populated with product data, skipping deleted products)
+exports.listWishlist = async (req, res) => {
+
+  try {
+
+    const customer = await Customer.findById(req.customer._id).populate("wishlist");
+
+    const products = customer.wishlist.filter(Boolean);
+
+    res.json(products);
+
+  } catch (err) {
+
+    res.status(500).json({ error: err.message });
+
+  }
+
+};
+
+// Add a product to the wishlist
+exports.addToWishlist = async (req, res) => {
+
+  try {
+
+    const { productId } = req.body;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    const customer = await Customer.findById(req.customer._id);
+
+    if (!customer.wishlist.some((id) => id.toString() === productId)) {
+      customer.wishlist.push(productId);
+      await customer.save();
+    }
+
+    const populated = await customer.populate("wishlist");
+
+    res.status(201).json(populated.wishlist.filter(Boolean));
+
+  } catch (err) {
+
+    res.status(400).json({ error: err.message });
+
+  }
+
+};
+
+// Remove a product from the wishlist
+exports.removeFromWishlist = async (req, res) => {
+
+  try {
+
+    const customer = await Customer.findById(req.customer._id);
+
+    customer.wishlist = customer.wishlist.filter(
+      (id) => id.toString() !== req.params.productId
+    );
+
+    await customer.save();
+
+    const populated = await customer.populate("wishlist");
+
+    res.json(populated.wishlist.filter(Boolean));
 
   } catch (err) {
 

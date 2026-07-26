@@ -86,6 +86,16 @@ const customerSchema = new mongoose.Schema(
     addresses: {
       type: [addressSchema],
       default: []
+    },
+
+    wishlist: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product"
+        }
+      ],
+      default: []
     }
   },
   {

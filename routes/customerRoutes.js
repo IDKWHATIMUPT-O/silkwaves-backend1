@@ -20,4 +20,8 @@ router.delete("/addresses/:addressId", customerAuth, authController.deleteAddres
 
 router.get("/orders", customerAuth, orderController.getMyOrders);
 
+router.get("/wishlist", customerAuth, authController.listWishlist);
+router.post("/wishlist", customerAuth, authController.addToWishlist);
+router.delete("/wishlist/:productId", customerAuth, authController.removeFromWishlist);
+
 module.exports = router;

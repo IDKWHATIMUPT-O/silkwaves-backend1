@@ -18,6 +18,11 @@ const productSchema = new mongoose.Schema(
       required: true
     },
 
+    compareAtPrice: {
+      type: Number,
+      default: null
+    },
+
     stock: {
       type: Number,
       default: 0
