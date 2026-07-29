@@ -25,6 +25,7 @@ const app = express();
 const invoiceRoutes = require("./routes/invoiceRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const emailRoutes = require("./routes/emailRoutes");
+const tallyRoutes = require("./routes/tallyRoutes");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -42,6 +43,7 @@ app.use("/auth", authRoutes);
 app.use("/invoices", invoiceRoutes);
 app.get("/test", (req, res) => {res.send("ok");});
 app.use("/email", emailRoutes);
+app.use("/tally", tallyRoutes);
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,

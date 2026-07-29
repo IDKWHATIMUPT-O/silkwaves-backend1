@@ -139,6 +139,26 @@ razorpayOrderId: {
     notes: {
       type: String,
       default: ""
+    },
+
+    tallyInvoiceSynced: {
+      type: Boolean,
+      default: false
+    },
+
+    tallyVoucherNumber: {
+      type: String,
+      default: null
+    },
+
+    tallySyncedAt: {
+      type: Date,
+      default: null
+    },
+
+    invoiceFileUrl: {
+      type: String,
+      default: null
     }
 
   },

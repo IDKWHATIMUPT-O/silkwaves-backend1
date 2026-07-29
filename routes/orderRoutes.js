@@ -1,10 +1,12 @@
 const express = require("express");
+const multer = require("multer");
 
 const controller = require("../controllers/orderController");
 const auth = require("../middleware/authMiddleware");
 const { requirePermission, requireAdminRole } = require("../middleware/permissionMiddleware");
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 /*
 |--------------------------------------------------------------------------
@@ -70,6 +72,15 @@ router.patch(
   auth,
   requirePermission("orders", "edit"),
   controller.updatePaymentStatus
+);
+
+// Upload manually-generated invoice PDF
+router.post(
+  "/:id/invoice",
+  auth,
+  requirePermission("orders", "edit"),
+  upload.single("voucherFile"),
+  controller.uploadInvoice
 );
 
 // Delete Order

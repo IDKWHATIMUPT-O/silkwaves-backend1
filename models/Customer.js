@@ -96,6 +96,11 @@ const customerSchema = new mongoose.Schema(
         }
       ],
       default: []
+    },
+
+    tallyLedgerName: {
+      type: String,
+      default: null
     }
   },
   {

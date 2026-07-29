@@ -2,6 +2,58 @@ const Order = require("../models/Order");
 const { sendEmail } = require("../services/emailService");
 const orderStatusUpdate = require("../emailTemplates/orderStatusUpdate");
 const { buildWorkbook, sendWorkbook } = require("../services/excelReport");
+const cloudinary = require("../services/cloudinary");
+const streamifier = require("streamifier");
+
+// Upload a manually-generated Tally invoice PDF for an order
+exports.uploadInvoice = async (req, res) => {
+
+  try {
+
+    if (!req.file) {
+      return res.status(400).json({
+        error: "No file uploaded"
+      });
+    }
+
+    const uploaded = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "silkwaves/vouchers",
+          resource_type: "raw"
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+
+      streamifier.createReadStream(req.file.buffer).pipe(stream);
+    });
+
+    const order = await Order.findOneAndUpdate(
+      { id: req.params.id },
+      { invoiceFileUrl: uploaded.secure_url },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        error: "Order not found"
+      });
+    }
+
+    res.json(order);
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
+};
 
 // Export All Orders (admin-only)
 exports.exportOrders = async (req, res) => {

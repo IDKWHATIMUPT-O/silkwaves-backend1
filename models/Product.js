@@ -46,6 +46,16 @@ const productSchema = new mongoose.Schema(
     galleryImages: {
       type: [String],
       default: []
+    },
+
+    tallyStockItemSynced: {
+      type: Boolean,
+      default: false
+    },
+
+    tallySyncedAt: {
+      type: Date,
+      default: null
     }
   },
   {
