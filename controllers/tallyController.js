@@ -15,6 +15,7 @@ exports.getPendingProducts = async (req, res) => {
       title: p.title,
       price: p.price,
       stock: p.stock,
+      category: p.category,
       updatedAt: p.updatedAt
     }))
   });
