@@ -112,6 +112,8 @@ exports.createProduct = async (req, res) => {
 
       category: req.body.category,
 
+      tallyGroup: req.body.tallyGroup || null,
+
       description: req.body.description,
 
       coverImage,
@@ -160,6 +162,10 @@ exports.updateProduct = async (req, res) => {
 
     product.category =
       req.body.category || product.category;
+
+    if (req.body.tallyGroup !== undefined) {
+      product.tallyGroup = req.body.tallyGroup || null;
+    }
 
     product.description =
       req.body.description || product.description;

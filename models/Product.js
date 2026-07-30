@@ -48,6 +48,11 @@ const productSchema = new mongoose.Schema(
       default: []
     },
 
+    tallyGroup: {
+      type: String,
+      default: null
+    },
+
     tallyStockItemSynced: {
       type: Boolean,
       default: false
