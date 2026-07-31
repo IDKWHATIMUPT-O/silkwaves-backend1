@@ -1,8 +1,18 @@
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Customer = require("../models/Customer");
+const Setting = require("../models/Setting");
+
+async function isSyncEnabled() {
+  const settings = await Setting.findOne();
+  return !settings || settings.tallySyncEnabled !== false;
+}
 
 exports.getPendingProducts = async (req, res) => {
+  if (!(await isSyncEnabled())) {
+    return res.json({ products: [] });
+  }
+
   const products = await Product.find({});
 
   const pending = products.filter(
@@ -40,6 +50,10 @@ exports.ackProduct = async (req, res) => {
 };
 
 exports.getPendingOrders = async (req, res) => {
+  if (!(await isSyncEnabled())) {
+    return res.json({ orders: [] });
+  }
+
   const orders = await Order.find({
     payment: "Paid",
     tallyInvoiceSynced: false

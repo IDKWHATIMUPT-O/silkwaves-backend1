@@ -70,6 +70,11 @@ const settingsSchema = new mongoose.Schema({
   packageHeight: {
     type: String,
     default: "8"
+  },
+
+  tallySyncEnabled: {
+    type: Boolean,
+    default: true
   }
 
 });
